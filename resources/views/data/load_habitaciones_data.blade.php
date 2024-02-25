@@ -15,62 +15,68 @@
         </thead>
         <tbody>
             @if(count($habitaciones) > 0)
-
-                @php($i=1)                 
-                @foreach($habitaciones as $key => $hab)
-                <?php $parameter=$hab->habitacion_id;?>
-                    <tr>
-                        <td>{{ $i }}</td>
-                        @if($hab->imagen!="")
-                            <td><img src="{{URL::asset('img/habitaciones/'.$hab->imagen)}}" alt="Imagen Producto" width="80" class="img-thumbnail"></td>
-                        @else 
-                        <td><img src="{{URL::asset('assets/images/bed.png')}}" alt="Imagen Producto" width="80" class="img-thumbnail"></td>
-                        @endif
-                        <td class="font-weight-bold">{{ $hab->habitacion }}</td>
-                        <td class="font-weight-bold">{{ $hab->categoria }}</td>
-                        <td class="font-weight-bold">{{ $hab->ubicacion }}</td>
-                        <td class="text-muted">{{ $hab->detalles }}</td>
-                        <td class="text-muted">{{ $hab->precio }}</td>
-                        @if($hab->estado == 1)
-                            <td><label class="badge bg-success">Disponible</label></td>
-                        @elseif($hab->estado == 2)
-                            <td><label class="badge bg-danger">Ocupado</label></td>
-                        @endif
-                        <td>
-                            <div class="btn-group" role="group">
-                              
-                                <img src="{{ url('assets/images/edit.png') }}" onclick="mostrarHabitacion(<?php echo "'".$parameter."'"; ?>)" title="Editar Habitación" style="cursor: pointer; height:24px; width:24px;">
-                 
-                                
-               
-                                <img src="{{ url('assets/images/delete.png') }}" onclick="eliminarHabitacion(<?php echo "'".$parameter."'"; ?>)" title="Eliminar Habitación" style="cursor: pointer; height:24px; width:24px;">
-                          
-                                
-                                @if($hab->estado == 1)
-
-                                    <img src="{{ url('assets/images/off.png') }}" onclick="OcupadaHabitación(<?php echo "'".$parameter."'"; ?>)" title="Habitación ocupada" style="cursor: pointer; height:24px; width:24px;">&nbsp;                                
-                                @elseif($hab->estado == 2)
-                                    <img src="{{ url('assets/images/check.png') }}" onclick="DisponibleHabitación(<?php echo "'".$parameter."'"; ?>)" title="Habitación Disponible" style="cursor: pointer; height:24px; width:24px;">&nbsp;                          
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-
-                    @php($i++)
-                @endforeach
-
-            @else 
-            
-                <tr>
-                    <td align="center" colspan="9">No se encontraron registros</td>
-                </tr>
-
+            <!-- Verifica si hay habitaciones para mostrar -->
+            @php($i=1)
+            <!-- Variable contador para numerar las habitaciones -->
+            @foreach($habitaciones as $key => $hab)
+            <?php $parameter = $hab->habitacion_id; ?>
+            <!-- Asigna el ID de la habitación a la variable $parameter -->
+            <tr>
+                <td>{{ $i }}</td>
+                <!-- Muestra el número de habitación -->
+                @if($hab->imagen != "")
+                <!-- Verifica si hay una imagen asociada a la habitación -->
+                <td><img src="{{ URL::asset('img/habitaciones/'.$hab->imagen) }}" alt="Imagen de Habitación"
+                        width="80" class="img-thumbnail"></td>
+                <!-- Muestra la imagen de la habitación -->
+                @else
+                <td><img src="{{ URL::asset('assets/images/bed.png') }}" alt="Imagen de Habitación" width="80"
+                        class="img-thumbnail"></td>
+                <!-- Si no hay imagen, muestra una imagen predeterminada -->
+                @endif
+                <td class="font-weight-bold">{{ $hab->habitacion }}</td>
+                <!-- Muestra el nombre de la habitación -->
+                <td class="font-weight-bold">{{ $hab->categoria }}</td>
+                <!-- Muestra la categoría de la habitación -->
+                <td class="font-weight-bold">{{ $hab->ubicacion }}</td>
+                <!-- Muestra la ubicación de la habitación -->
+                <td class="text-muted">{{ $hab->detalles }}</td>
+                <!-- Muestra los detalles de la habitación -->
+                <td class="text-muted">{{ $hab->precio }}</td>
+                <!-- Muestra el precio de la habitación -->
+                @if($hab->estado == 1)
+                <!-- Verifica si la habitación está disponible -->
+                <td><label class="badge bg-success">Disponible</label></td>
+                <!-- Muestra una etiqueta indicando que la habitación está disponible -->
+                @elseif($hab->estado == 2)
+                <!-- Si la habitación no está disponible -->
+                <td><label class="badge bg-danger">Ocupado</label></td>
+                <!-- Muestra una etiqueta indicando que la habitación está ocupada -->
+                @endif
+                <td>
+                    <div class="btn-group" role="group">
+                        <!-- Grupo de botones de acciones -->
+                        <i class="fas fa-edit text-muted" onclick="mostrarHabitacion('<?php echo $parameter; ?>')" title="Editar Habitación" style="cursor: pointer; font-size: 24px;"></i>
+                        <!-- Botón para editar la habitación -->
+                        &nbsp;
+                        &nbsp;
+                        <i class="fas fa-trash-alt text-muted" onclick="eliminarHabitacion('<?php echo $parameter; ?>')" title="Eliminar Habitación" style="cursor: pointer; font-size: 24px;"></i>
+                        <!-- Botón para eliminar la habitación -->
+                    </div>
+                </td>
+            </tr>
+            @php($i++)
+            <!-- Incrementa el contador de habitaciones -->
+            @endforeach
+            @else
+            <!-- Si no hay habitaciones para mostrar -->
+            <tr>
+                <td align="center" colspan="9">No se encontraron registros</td>
+                <!-- Muestra un mensaje indicando que no se encontraron habitaciones -->
+            </tr>
             @endif
-    
         </tbody>
     </table>
-
-
     {{ $habitaciones->onEachSide(1)->links('partials.my-paginate') }}
-
+    <!-- Muestra la paginación de las habitaciones -->
 </div>

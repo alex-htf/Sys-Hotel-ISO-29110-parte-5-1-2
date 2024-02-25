@@ -8,5 +8,9 @@ use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
-    use AuthorizesRequests, ValidatesRequests;
+    // Usa el trait AuthorizesRequests, que proporciona métodos para autorización de solicitudes
+    use AuthorizesRequests;
+
+    // Usa el trait ValidatesRequests, que proporciona métodos para validación de solicitudes
+    use ValidatesRequests;
 }

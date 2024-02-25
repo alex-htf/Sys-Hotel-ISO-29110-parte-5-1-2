@@ -1,5 +1,4 @@
 @extends('master')
-
 @section('content')
 
 <!-- App hero header starts -->
@@ -14,19 +13,13 @@
             <li class="breadcrumb-item active" aria-current="page"><i class="fa-solid fa-ban"></i> Página no Encontrada</li>
         </ol>
     </nav>
-
 </div>
 <!-- App Hero header ends -->
 
-
 <div class="app-body" style="margin-top:-8.5rem !important;height: calc(103vh - 202px);">
-
     <div class="row">
-
         <div class="col-12">
-
             <div class="card">
-                
                 <div class="d-flex justify-content-center">
                     <div class="card-body text-center">
                         <h2 class="mt-4 mb-4">Lo Sentimos</h2>
@@ -35,13 +28,8 @@
                         <a class="btn btn-dark btn-lg bradius mt-4" href="{{ url('/') }}">Volver al Inicio</a>
                     </div>
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
-
 @endsection

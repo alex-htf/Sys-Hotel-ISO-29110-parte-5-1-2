@@ -31,7 +31,7 @@
   --bs-gray-900: #252528;
   --bs-primary: #00368e;
   --bs-secondary: #f10a67;
-  --bs-danger: #df421a;
+  --bs-danger: #925167;
   --bs-success: #3a8000;
   --bs-info: #005ee1;
   --bs-warning: #e7b100;
@@ -120,10 +120,10 @@
   --bs-focus-ring-width: 0.25rem;
   --bs-focus-ring-opacity: 0.25;
   --bs-focus-ring-color: rgba(0, 54, 142, 0.25);
-  --bs-form-valid-color: #3a8000;
-  --bs-form-valid-border-color: #3a8000;
-  --bs-form-invalid-color: #df421a;
-  --bs-form-invalid-border-color: #df421a;
+  --bs-form-valid-color: #51927B;
+  --bs-form-valid-border-color: #51927B;
+  --bs-form-invalid-color: #925167;
+  --bs-form-invalid-border-color: #925167;
 }
 
 [data-bs-theme=dark] {
@@ -264,7 +264,7 @@ h5, .h5 {
 }
 
 h6, .h6 {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
 }
 
 p {
@@ -3000,19 +3000,19 @@ textarea.form-control-lg {
 
 .btn-danger {
   --bs-btn-color: #fff;
-  --bs-btn-bg: #df421a;
-  --bs-btn-border-color: #df421a;
+  --bs-btn-bg: #925167;
+  --bs-btn-border-color: #925167;
   --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: #be3816;
-  --bs-btn-hover-border-color: #b23515;
+  --bs-btn-hover-bg: #925167;
+  --bs-btn-hover-border-color: #925167;
   --bs-btn-focus-shadow-rgb: 228, 94, 60;
   --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: #b23515;
-  --bs-btn-active-border-color: #a73214;
+  --bs-btn-active-bg: #925167;
+  --bs-btn-active-border-color: #925167;
   --bs-btn-active-shadow: inset 0 3px 5px rgba(26, 26, 29, 0.125);
   --bs-btn-disabled-color: #fff;
-  --bs-btn-disabled-bg: #df421a;
-  --bs-btn-disabled-border-color: #df421a;
+  --bs-btn-disabled-bg: #925167;
+  --bs-btn-disabled-border-color: #925167;
 }
 
 .btn-success {
@@ -3135,19 +3135,19 @@ textarea.form-control-lg {
 }
 
 .btn-outline-danger {
-  --bs-btn-color: #df421a;
-  --bs-btn-border-color: #df421a;
+  --bs-btn-color: #925167;
+  --bs-btn-border-color: #925167;
   --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: #df421a;
-  --bs-btn-hover-border-color: #df421a;
+  --bs-btn-hover-bg: #925167;
+  --bs-btn-hover-border-color: #925167;
   --bs-btn-focus-shadow-rgb: 223, 66, 26;
   --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: #df421a;
-  --bs-btn-active-border-color: #df421a;
+  --bs-btn-active-bg: #925167;
+  --bs-btn-active-border-color: #925167;
   --bs-btn-active-shadow: inset 0 3px 5px rgba(26, 26, 29, 0.125);
-  --bs-btn-disabled-color: #df421a;
+  --bs-btn-disabled-color: #925167;
   --bs-btn-disabled-bg: transparent;
-  --bs-btn-disabled-border-color: #df421a;
+  --bs-btn-disabled-border-color: #925167;
   --bs-gradient: none;
 }
 
@@ -4341,6 +4341,11 @@ textarea.form-control-lg {
 .card > .card-header + .list-group,
 .card > .list-group + .card-footer {
   border-top: 0;
+}
+
+.icono-campana {
+  font-size: 20px; /* Ajusta el tamaño del icono según sea necesario */
+  color: white; /* Cambia el color del icono a negro */
 }
 
 .card-body {
@@ -11905,19 +11910,19 @@ a:hover {
 }
 
 .custom-tooltip-danger .tooltip-inner {
-  background-color: #df421a;
+  background-color: #925167;
 }
 .custom-tooltip-danger[data-popper-placement^=top] .tooltip-arrow::before {
-  border-top-color: #df421a;
+  border-top-color: #925167;
 }
 .custom-tooltip-danger[data-popper-placement^=left] .tooltip-arrow::before {
-  border-left-color: #df421a;
+  border-left-color: #925167;
 }
 .custom-tooltip-danger[data-popper-placement^=bottom] .tooltip-arrow::before {
-  border-bottom-color: #df421a;
+  border-bottom-color: #925167;
 }
 .custom-tooltip-danger[data-popper-placement^=right] .tooltip-arrow::before {
-  border-right-color: #df421a;
+  border-right-color: #925167;
 }
 
 .custom-tooltip-success .tooltip-inner {
@@ -12014,7 +12019,7 @@ a:hover {
 .card-title {
   margin: 0 0 0 -16px;
   padding: 0 0 0 20px;
-  border-left: 3px solid #00368e;
+  border-left: 3px solid #211F32;
 }
 
 .card-subtitle {
@@ -12178,8 +12183,8 @@ a:hover {
   max-height: 32px;
 }
 .page-wrapper.pinned .sidebar-user-profile img.profile-thumb {
-  width: 60px;
-  height: 60px;
+  width: 10px;
+  height: 10px;
 }
 .page-wrapper.pinned .sidebar-user-profile h5.profile-name, .page-wrapper.pinned .sidebar-user-profile .profile-name.h5 {
   max-width: 60px;
@@ -12219,7 +12224,7 @@ a:hover {
   .page-wrapper.pinned:not(.sidebar-hovered) .sidebar-wrapper .sidebar-menu li.treeview:after {
     display: none !important;
   }
-  .page-wrapper.pinned.sidebar-hovered .sidebar-user-profile img.profile-thumb {
+  .page-wrapper.pinned.sidebar-hovered .sidebar-user-profile img. {
     width: 90px;
     height: 90px;
   }
@@ -12251,7 +12256,7 @@ a:hover {
 }
 .app-brand .logo {
   max-width: 180px;
-  max-height: 40px;
+  max-height: 100px;
   transition: width 1s ease;
 }
 
@@ -12289,12 +12294,7 @@ a:hover {
   align-items: center;
   flex-direction: column;
 }
-.sidebar-user-profile img.profile-thumb {
-  width: 90px;
-  height: 90px;
-  border: 1px dashed #acb5c2;
-  transition: all, 0.5s, ease-in-out;
-}
+
 @media (prefers-reduced-motion: reduce) {
   .sidebar-user-profile img.profile-thumb {
     transition: none;
@@ -12421,7 +12421,7 @@ ul.profile-actions > li:last-child {
   transform: rotate(0deg);
 }
 .sidebar-menu .treeview-menu > li > a:hover {
-  background-color: #003fa5;
+  background-color: #003fa5; 
   color: #fff;
 }
 .sidebar-menu .treeview-menu > li > a.active-sub {

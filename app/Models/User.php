@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -13,21 +12,10 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Los atributos que pueden ser asignados masivamente.
      *
-     * @var array<int, string>
+     * @var array
      */
-    // protected $fillable = [
-    //     'name',
-    //     'email',
-    //     'password',
-    // ];
-    protected $table = 'users';
-
-    protected $primaryKey = 'user_id';
-
-    public $timestamps = false;
-
     protected $fillable = [
         'nombres',
         'apellidos',
@@ -40,12 +28,34 @@ class User extends Authenticatable
         'estado',  
         'oculto',
         'created_at',
-        'update_at',
+        'updated_at'
     ];
+
     /**
-     * The attributes that should be hidden for serialization.
+     * La tabla asociada con el modelo.
      *
-     * @var array<int, string>
+     * @var string
+     */
+    protected $table = 'users';
+
+    /**
+     * La clave primaria asociada con la tabla.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'user_id';
+
+    /**
+     * Indica si el modelo debería tener timestamps.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
+     * Los atributos que deben ser ocultados para la serialización.
+     *
+     * @var array
      */
     protected $hidden = [
         'password',
@@ -53,28 +63,34 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * Los atributos que deben ser lanzados a tipos de datos específicos.
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'password' => 'hashed'
     ];
 
+    /**
+     * Obtener usuarios basados en el criterio dado.
+     *
+     * @param  string  $nusuario
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
     public static function getUsers($nusuario = '')
     {
-        $usuarios= User::select('users.*');
+        // Selecciona todos los usuarios
+        $usuarios = User::select('users.*');
 
+        // Filtra por nombres o apellidos que coincidan parcialmente con el término de búsqueda
         if (isset($nusuario) && $nusuario != ''):
-            $usuarios->where('users.nombres','LIKE','%'.$nusuario.'%')
-                     ->orWhere('users.apellidos','LIKE','%'.$nusuario.'%');
+            $usuarios->where('users.nombres', 'LIKE', '%' . $nusuario . '%') ->orWhere('users.apellidos', 'LIKE', '%' . $nusuario . '%');
         endif;  
 
+        // Ordena los usuarios por apellidos en orden ascendente y los paginas
         $usuarios = $usuarios->orderBy('users.apellidos', 'ASC')->paginate(10);
 
         return $usuarios;
     }
-
-
 }

@@ -41,10 +41,10 @@ return new class extends Migration
             $table->decimal('total',12,2);
             $table->dateTime('fecha_entrada',0);
             $table->dateTime('fecha_salida',0);
-            $table->integer('toallas');
-            // $table->char('estado_pago',1);
-            $table->char('tipo_pago',1);
-            $table->char('nro_operacion',20)->nullable();
+            //$table->integer('toallas');
+            //$table->char('estado_pago',1);
+            //$table->char('tipo_pago',1);
+            //$table->char('nro_operacion',20)->nullable();
             $table->text('observaciones')->nullable();
             $table->char('estado',1);
             $table->timestamps();

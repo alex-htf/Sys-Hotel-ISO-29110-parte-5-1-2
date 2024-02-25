@@ -9,22 +9,18 @@
 
 		<!-- Meta -->
 		<meta name="description" content="Sistema de Recepción de Habitaciones para Hotel" />
-		<meta name="author" content="Martín Avila" />
+		<meta name="author" content="Verónica Rodríguez" />
 		<meta property="og:title" content="Sys Hotel">
 		<meta property="og:description" content="Sistema de Recepción de Habitaciones para Hotel">
 		<meta property="og:type" content="Website">
 		<meta property="og:site_name" content="Sys-Hotel">
 		<link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" />
 
-		
-
 		<!-- Bootstrap font icons css -->
 		<link rel="stylesheet" href="assets/fonts/bootstrap/bootstrap-icons.css" />
 
 		<!-- Main css -->
 		<link rel="stylesheet" href="{{ asset('assets/css/main.css') }}" />
-
-
 	</head>
 
 	<body>
@@ -39,7 +35,7 @@
 								<a href="index.html" class="mb-4 d-flex justify-content-center">
 									<img src="{{ asset('assets/images/logo.jpeg')}}" class="img-fluid login-logo" alt="Nyke Admin" />
 								</a>
-								<h5 class="fw-light mb-5">Bienvenido, Por favor ingrese los datos para Acceder al Sistema.</h5>
+								<h5 class="fw-light mb-5">Bienvenido. Por favor ingrese los datos para acceder al sistema.</h5>
 
 								<div class="mb-3">
 									<label class="form-label">Usuario:</label>
@@ -50,13 +46,11 @@
 									<input type="password" class="form-control" name="LoginPassword" placeholder="Ingresa la Contraseña" />
 								</div>
 
-								
 								<div class="d-grid py-3 mt-4">
 									<button type="submit" class="btn btn-lg btn-primary">
 										Ingresar
 									</button>
 								</div>
-
 							</div>
 
 							@if(Session::has('message'))
@@ -66,7 +60,6 @@
 								@else
 									<div class="alert alert-danger" style="display:block;">
 								@endif
-								
 									{{ Session::get('message') }}
 									@if ($errors->any())
 									<ul>
@@ -78,17 +71,11 @@
 								</div>
 							</div>
 							@endif
-
 						</div>
 					</form>
-
-				
-
-
 				</div>
 			</div>
 		</div>
 		<!-- Container end -->
 	</body>
-
 </html>

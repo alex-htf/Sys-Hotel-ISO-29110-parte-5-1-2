@@ -6,324 +6,216 @@ use Illuminate\Http\Request;
 use App\Models\Categoria;
 use App\Models\Habitacion;
 use App\Models\Tipo_Documento;
-use App\Models\Tarifas_Habitaciones;
-use App\Models\Tipo_Pago;
-use App\Models\Tipo_Comprobante;
 use App\Models\Persona;
 use App\Models\Proceso;
 use App\Models\Ubicacion;
 use App\Models\Configuracion;
 use DB, Validator;
+use App\Rules\CedulaEcuatoriana;
+use App\Rules\RucEcuatoriano;
 use PDF;
 
 class RecepcionController extends Controller
 {
     //
-
-    public function __construct()  
+    public function __construct()
     {
         $this->middleware('auth');
     }
-    
 
+    // Método para obtener la vista de recepción
     public function getRecepcion(Request $request)
     {
         $ubicacionbuscar = ($request->get('ubicacion')) ? $request->get('ubicacion') : '_all_';
-
         $habitaciones = Habitacion::getListRecepcionHabitacion($ubicacionbuscar);
-
         $ubicaciones = Ubicacion::getUbicaciones();
-
         $ruta = 'recepcion';
-
-        if($request->ajax()):
-            return view('data.load_recepciones_data', compact('habitaciones', 'ubicaciones','ruta'));
+        if ($request->ajax()):
+            return view('data.load_recepciones_data', compact('habitaciones', 'ubicaciones', 'ruta'));
         endif;
-
         return view('modules.recepciones', compact('habitaciones', 'ubicaciones', 'ruta'));
     }
 
+    // Método para obtener la vista de proceso de recepción para una habitación específica
     public function getRecepcionProceso($id)
     {
-        $verificarEstado= Habitacion::getEstado($id);
-        
-        if($verificarEstado->estado != "1"):
+        $verificarEstado = Habitacion::getEstado($id);
+        if ($verificarEstado->estado != "1"):
             return redirect('/recepcion');
         endif;
-
         $dataHabitacion = Habitacion::getDataHabitacion($id);
-        $tipodocs  = Tipo_Documento::all();
-        $tipopags  = Tipo_Pago::all();
-        // $tarifashab = Tarifas_Habitaciones::getListTarifas($id);
-        // $tipocomprobante = Tipo_Comprobante::all();
-        $habitacionid= $id;
-
+        $tipodocs = Tipo_Documento::all();
+        $habitacionid = $id;
         $ruta = 'recepcion';
-
-        return view('modules.recepcion_proceso', compact('dataHabitacion', 'tipodocs', 'tipopags','habitacionid', 'ruta'));   
+        return view('modules.recepcion_proceso', compact('dataHabitacion', 'tipodocs', 'habitacionid', 'ruta'));
     }
 
+    // Método para almacenar los datos de la recepción
     public function store(Request $request)
     {
         if (!$request->ajax()):
             return redirect('/recepcion');
         endif;
-
         $rules = [
-            'tipo_documento'=>'required',
-            'num_doc' => 'required|min:8',
-            'nomCliente' => 'required',
-            // 'razonsocialCiente' => 'required',
-            // 'tarifa_hab' => 'required',
+            'tipo_documento' => 'required',
+            'nomCliente' => 'required|regex:/^[a-zA-Z\s]+$/|max:100',
+            'direCliente' => 'required|max:100',
+            'telCliente' => 'required|digits:10',
+            'emailCliente' => 'required|email',
+            'observacionesCliente' => 'max:150',
             'cantidadnoches' => 'required|min:1',
             'cantidadpersonas' => 'required|min:1',
-            // 'Tipo_comprobante' => 'required',
-            'estado_pago' => 'required',
-            'fechaSalida'=>'required',
+            'fechaSalida' => 'required',
             'horasalida' => 'required',
         ];
 
+        // Valida si el tipo de documento es pasaporte
+        if ($request->tipo_documento == "3"):
+            $rules["num_doc"] = "required|regex:/^[a-zA-Z0-9\s]+$/|between:6,15";
+
+        // Valida si el tipo de documento es ruc
+        elseif ($request->tipo_documento == "2"):
+            $rules["num_doc"] = ['required', new RucEcuatoriano];
+
+        // Valida si el tipo de documento es cedula
+        elseif ($request->tipo_documento == "1"):
+            $rules["num_doc"] = ['required', new CedulaEcuatoriana];
+        endif;
+
         $messages = [
             'tipo_documento.required' => 'El campo tipo de documento es requerido',
-            'num_doc.required' => 'El Campo Número de Documento debe ser requerido',
-            'num_doc.min' => 'El Campo Número de Documento debe tener como mínimo 8 carácteres',
             'nomCliente.required' => 'El campo nombre del cliente es requerido',
-            // 'razonsocialCiente.required' => 'El campo razon social es requerido',
-            // 'tarifa_hab.required' => 'La tarifa de la habitación es requerida',
+            'emailCliente.required' => 'El email debe ser requerido',
+            'emailCliente.email' => 'El email del cliente debe ser un formato válido',
+            'direCliente.required' => 'La dirección del cliente es requerida',
+            'telCliente.required' => 'El Teléfono del Cliente es requerido',
+            'telCliente.digits' => 'El Número de documento debe ser númerico de 10 dígitos',
             'cantidadnoches.required' => 'La cantidad de noches es requerida',
             'cantidadnoches.min' => 'La cantidad de noches como mínima es 1',
             'cantidadpersonas.required' => 'La cantidad de Personas es requerida',
             'cantidadpersonas.min' => 'La cantidad de Personas como mínima es 1',
-            // 'Tipo_comprobante.required' => 'El tipo de comprobante es requerido',
-            'estado_pago.required' => 'El estado de pago es requerido',
             'fechaSalida.required' => 'La fecha de salida es requerida',
             'horasalida.required' => 'La Hora de salida es requerida',
         ];
 
+        if ($request->tipo_documento == "3"):
+            $messages["num_doc.required"] = "el campo número de documento es requerido";
+            $messages["num_doc.regex"] = "Debe ingresar un formato válido para pasaporte";
+            $messages["num_doc.between"] = "Debe ingresar entre 6 y 15 caracteres";
+
+        elseif ($request->tipo_documento == "2"):
+            $messages["num_doc.required"] = "el campo número de documento es requerido";
+            $messages["num_doc.digits"] = "El Número de documento debe ser númerico de 13 dígitos";
+
+        elseif ($request->tipo_documento == "1"):
+            $messages["num_doc.required"] = "el campo número de documento es requerido";
+        endif;
+
         $validator = Validator::make($request->all(), $rules, $messages);
-
-        if($validator->fails()):
-            return response()->json(['errors'=>$validator->errors(), 'code' => '422']);
+        if ($validator->fails()):
+            return response()->json(['errors' => $validator->errors(), 'code' => '422']);
         else:
-
-            // $serie = '';
-            $tipopago = '';
-            $noperacion = '';
             $preciototal = '';
             $preciototalF = '';
 
-            if($request->estado_pago == "1"):
-                if($request->tipo_pago == ""):
-                    return response()->json(['errors'=>$validator->errors(), 'code' => '425']);
-                    exit;
-                elseif($request->tipo_pago == "1"):
-                    $tipopago = $request->tipo_pago;
-                endif;
-            endif;
+            // Verificar si el cliente existe 
+            $existClient = DB::table('personas')->where('tipo_documento_id', $request->tipo_documento)->where('documento', $request->num_doc)->count();
+            $cliente_id = '';
 
-            // if($request->estado_pago == "1"):
-            //     if($request->tipo_pago == ""):
-            //         return response()->json(['errors'=>$validator->errors(), 'code' => '425']);
-            //         exit;
-            //     elseif($request->tipo_pago == "1"):
-            //         $tipopago = $request->tipo_pago;
-            //     elseif($request->tipo_pago == "2" || $request->tipo_pago == "3"):
-            //         $tipopago = $request->tipo_pago;
-            //         if($request->nro_operacion == ""):
-            //             return response()->json(['errors'=>$validator->errors(), 'code' => '426']);
-            //             exit;
-            //         else:
-            //             $noperacion = $request->nro_operacion;
-            //         endif;
-            //     endif;
-            // endif;
-
-            //Verificar si el cliente existe 
-            $existClient = DB::table('personas')->where('tipo_documento_id', $request->tipo_documento)->where('documento',$request->num_doc)->count();
-            
-            $cliente_id='';
-           
-            if($existClient>0):
-                $clientinfo = DB::table('personas')->select('persona_id')->where('tipo_documento_id', $request->tipo_documento)->where('documento',$request->num_doc)->first();
+            if ($existClient > 0):
+                $clientinfo = DB::table('personas')->select('persona_id')->where('tipo_documento_id', $request->tipo_documento)->where('documento', $request->num_doc)->first();
                 $cliente_id = $clientinfo->persona_id;
             else:
-
                 $dataCliente = [
-                    "tipo_documento_id"=>$request->tipo_documento,
+                    "tipo_documento_id" => $request->tipo_documento,
                     "documento" => $request->num_doc,
                     "nombre" => $request->nomCliente,
-                    // "razon_social"=>$request->razonsocialCiente,
                     "direccion" => $request->direCliente,
                     "telefono" => $request->telCliente,
                     "email" => $request->emailCliente,
-                    // "observaciones" => $request->observacionesCliente,
-                    "created_at"=>now()
+                    "created_at" => now()
                 ];
 
-                if($cliente = Persona::create($dataCliente)):
+                if ($cliente = Persona::create($dataCliente)):
                     $cliente_id = $cliente->persona_id;
                 else:
-                    return response()->json(['errors'=>$validator->errors(), 'code' => '425']);
+                    return response()->json(['errors' => $validator->errors(), 'code' => '425']);
                     exit;
                 endif;
-    
             endif;
 
-            // Validar si es BOleta o Factura
-            // if($request->Tipo_comprobante == 1):
-            //     // 1 es Factura
-            //     $serie = 'F001';
-            //     $nrosexist = DB::table('procesos')->where('tipo_comprobante_id','1')->count();
-            //     if($nrosexist>1):
-            //         $ultimocomprobantenum = Proceso::getmaxNumDoc('1'); 
-            //         $newnumcomprobante =   (int) $ultimocomprobantenum + 1;
-            //         $numcomprobante = str_pad($newnumcomprobante, 8, "0", STR_PAD_LEFT);  
-            //     else:
-            //         $numcomprobante = '00000001';
-            //     endif;
-
-            // elseif($request->Tipo_comprobante == 2):
-            //     // 2 es Boleta
-            //     $serie = 'B001';
-            //     $nrosexist = DB::table('procesos')->where('tipo_comprobante_id','2')->count();
-            //     if($nrosexist>1):
-            //         $ultimocomprobantenum = Proceso::getmaxNumDoc('2'); 
-            //         $newnumcomprobante =   (int) $ultimocomprobantenum + 1;
-            //         $numcomprobante = str_pad($newnumcomprobante, 8, "0", STR_PAD_LEFT);  
-            //     else:
-            //         $numcomprobante = '00000001';
-            //     endif;
-            // endif;
-
             // Validar el número de serie;
-
             $preciototal = $request->hddpricet * $request->cantidadnoches;
             $preciototalF = $preciototal * $request->cantidadpersonas;
-            // echo $request->horasalida;exit;
             $fecha = $request->fechaSalida;
             $hora = $request->horasalida;
-            $fechaSalida = $fecha.' '.$hora;
+            $fechaSalida = $fecha . ' ' . $hora;
 
             $dataProceso = [
-                "habitacion_id"=>$request->hddhabitacion_id,
-                "cliente_id"=>$cliente_id,
-                // "tarifa_id"=>$request->tarifa_hab,
-                // "tipo_comprobante_id"=>$request->Tipo_comprobante,
-                // "serie"=>$serie,
-                // "numero"=>$numcomprobante,
-                // "precio" => number_format((float)$request->hddpricet, 2, '.', ''),
+                "habitacion_id" => $request->hddhabitacion_id,
+                "cliente_id" => $cliente_id,
                 "cant_noches" => $request->cantidadnoches,
                 "cant_personas" => $request->cantidadpersonas,
-                "total" => number_format((float)$preciototalF, 2, '.', ''),
+                "total" => number_format((float) $preciototalF, 2, '.', ''),
                 "fecha_entrada" => now(),
-                "fecha_salida" =>$fechaSalida,
-                // "toallas" => $request->toallastxt,
-                "estado_pago" => $request->estado_pago,
-                "tipo_pago" => $tipopago,
-                "nro_operacion" => $noperacion,
+                "fecha_salida" => $fechaSalida,
                 "observaciones" => $request->observacionesCliente,
                 "estado" => '1',
                 "created_at" => now()
             ];
 
-            if(Proceso::create($dataProceso)):
+            if (Proceso::create($dataProceso)):
                 Habitacion::habitacionOcupada($request->hddhabitacion_id);
-                return response()->json(['msg'=>'sucess', 'code' => '200', 'url'=>url('/recepcion')]);
-            else: 
-                return response()->json(['errors'=>$validator->errors(), 'code' => '425']);
+                return response()->json(['msg' => 'sucess', 'code' => '200', 'url' => url('/recepcion')]);
+            else:
+                return response()->json(['errors' => $validator->errors(), 'code' => '425']);
             endif;
-
         endif;
-
     }
 
+    // Método para obtener la vista de proceso de salida para una habitación específica
     public function getProcesoSalida($id)
     {
-        $verificarEstado= Habitacion::getEstado($id);
-        $tipopags  = Tipo_Pago::all();
-        //validamos si la habitación esta ocupada
-        if($verificarEstado->estado != "2"):
+        $verificarEstado = Habitacion::getEstado($id);
+        // validamos si la habitación esta ocupada
+        if ($verificarEstado->estado != "2"):
             return redirect('/recepcion');
         endif;
-        
+
         $dataRecepcion = Proceso::getRecepcionData($id);
-
         $ruta = 'recepcion';
-
-        if($dataRecepcion == NULL):
+        if ($dataRecepcion == NULL):
             return redirect('/recepcion');
         endif;
-        
-        return view('modules.recepcion_salida', compact('dataRecepcion', 'tipopags', 'ruta'));
-    }  
+        return view('modules.recepcion_salida', compact('dataRecepcion', 'ruta'));
+    }
 
+    // Método para generar el comprobante de salida
     public function generarComprobante(Request $request)
     {
         $proceso_id = $request->hddproceso_id;
-        $tipopago = $request->cbotipopago;
-        // $nrooperacionfinal = $request->nrooperacionfinal;
-        $nrooperacionfinal = '';
-        $estadopago = $request->hddestado_pago;
-        if($estadopago == "1"):
-
-          self::udptGenComprobante($proceso_id, $tipopago, $nrooperacionfinal,$estadopago);
-          return response()->json(['msg'=>'sucess', 'code' => '200', 'url'=>url('/recepcion/comprobante/'.$proceso_id)]);
-
-        elseif ($estadopago == "2"):
-
-            if($tipopago == ""):
-
-                return response()->json(['code' => '421']);
-            elseif($tipopago == "1"):
-
-                self::udptGenComprobante($proceso_id, $tipopago, $nrooperacionfinal, $estadopago);
-                return response()->json(['msg'=>'sucess', 'code' => '200', 'url'=>url('/recepcion/comprobante/'.$proceso_id)]);
-                
-        //     else:
-
-        //         if($nrooperacionfinal == ""):
-
-        //             return response()->json(['code' => '422']);
-        //         else:
-
-        //            self::udptGenComprobante($proceso_id, $tipopago, $nrooperacionfinal, $estadopago);
-        //            return response()->json(['msg'=>'sucess', 'code' => '200', 'url'=>url('/recepcion/comprobante/'.$proceso_id)]);
-
-        //         endif;
-                
-            endif;
-        
-        else:
-            return response()->json(['code' => '425']);
-        endif;
-
-       
+        self::udptGenComprobante($proceso_id);
+        return response()->json(['msg' => 'sucess', 'code' => '200', 'url' => url('/recepcion/comprobante/' . $proceso_id)]);
     }
 
-    public function udptGenComprobante($proceso_id, $tipopago, $nrooperacionfinal, $estadopago)
+    // Método para actualizar el estado del proceso y marcar como generado el comprobante
+    public function udptGenComprobante($proceso_id)
     {
         $habitacioniD = Proceso::getHabitacionProcesoId($proceso_id);
         $hdisponible = Habitacion::habitacionDisponible($habitacioniD->habitacion_id);
-
         $proceso = Proceso::find($proceso_id);
 
         $data = [
-            "estado"=>0,
+            "estado" => 0,
         ];
-
-        if($estadopago == 2):
-            $data["tipo_pago"] = $tipopago;
-            // $data["nro_operacion"] = $nrooperacionfinal;
-        endif;
-        
         $proceso->update($data);
     }
 
+    // Método para mostrar el comprobante generado
     public function postComprobante($proceso_id)
     {
         $estadoProceso = Proceso::select('estado')->where('proceso_id', $proceso_id)->first();
-
-        if($estadoProceso->estado != "0"):
+        if ($estadoProceso->estado != "0"):
             return redirect('/recepcion');
         endif;
 
@@ -341,44 +233,52 @@ class RecepcionController extends Controller
         $mesSalidaEspañol = self::mesEspañol($mesSalida);
         $añoSalida = date('Y', strtotime($fechaSalida));
 
-        $nombreHotel =  Configuracion::get_valorxvariable('nombre_hotel');
-        $rucHotel =  Configuracion::get_valorxvariable('ruc');
-        $direccionHotel =  Configuracion::get_valorxvariable('direccion_hotel');
-        $telHotel =  Configuracion::get_valorxvariable('telefono_hotel');
-        $emailHotel =  Configuracion::get_valorxvariable('email_hotel');
-        // $iva =  Configuracion::get_valorxvariable('iva');
+        $nombreHotel = Configuracion::get_valorxvariable('nombre_hotel');
+        $rucHotel = Configuracion::get_valorxvariable('ruc');
+        $direccionHotel = Configuracion::get_valorxvariable('direccion_hotel');
+        $telHotel = Configuracion::get_valorxvariable('telefono_hotel');
+        $emailHotel = Configuracion::get_valorxvariable('email_hotel');
 
         $ruta = 'recepcion';
 
-        return view('modules.comprobante', compact('dataFactura', 'diaIngreso', 'mesIngresoEspañol', 'añoIngreso','diaSalida','mesSalidaEspañol','añoSalida', 'nombreHotel','rucHotel','direccionHotel', 'telHotel', 'emailHotel', 'ruta'));
-
+        return view('modules.comprobante', compact(
+            'dataFactura',
+            'diaIngreso',
+            'mesIngresoEspañol',
+            'añoIngreso',
+            'diaSalida',
+            'mesSalidaEspañol',
+            'añoSalida',
+            'nombreHotel',
+            'rucHotel',
+            'direccionHotel',
+            'telHotel',
+            'emailHotel',
+            'ruta'
+        ));
     }
 
+    // Método para obtener la lista de historial de recepciones
     public function getListHistorial(Request $request)
     {
         $categoriabuscar = ($request->get('categoria')) ? $request->get('categoria') : '_all_';
         $ubicacionbuscar = ($request->get('ubicacion')) ? $request->get('ubicacion') : '_all_';
-        $estadopagobuscar = ($request->get('estado_pago')) ? $request->get('estado_pago') : '_all_';
-
         $categorias = Categoria::getCategorias();
         $ubicaciones = Ubicacion::getUbicaciones();
-        $dataHistorial = Proceso::getDataHistorial($categoriabuscar, $ubicacionbuscar, $estadopagobuscar);
-
+        $dataHistorial = Proceso::getDataHistorial($categoriabuscar, $ubicacionbuscar);
         $ruta = 'historial';
 
-        if($request->ajax()):
+        if ($request->ajax()):
             return view('data.load_historial_data', compact('dataHistorial', 'categorias', 'ubicaciones'));
         endif;
-
         return view('modules.historial-recepcion', compact('dataHistorial', 'categorias', 'ubicaciones', 'ruta'));
     }
 
-
+    // Método para obtener el nombre del mes en español
     public function mesEspañol($mes)
     {
-        $mesEspañol = ''; 
-        switch($mes)
-        {   
+        $mesEspañol = '';
+        switch ($mes) {
             case "01":
                 $mesEspañol = "Enero";
                 break;
@@ -389,35 +289,33 @@ class RecepcionController extends Controller
                 $mesEspañol = "Marzo";
                 break;
             case "04":
-                $mesEspañol = "Abril";  
+                $mesEspañol = "Abril";
                 break;
             case "05":
-                $mesEspañol = "Mayo";  
+                $mesEspañol = "Mayo";
                 break;
             case "06":
-                $mesEspañol = "Junio";  
+                $mesEspañol = "Junio";
                 break;
             case "07":
-                $mesEspañol = "Julio";  
+                $mesEspañol = "Julio";
                 break;
             case "08":
-                $mesEspañol = "Agosto";  
+                $mesEspañol = "Agosto";
                 break;
             case "09":
-                $mesEspañol = "Setiembre";  
+                $mesEspañol = "Setiembre";
                 break;
             case "10":
-                $mesEspañol = "Octubre";  
+                $mesEspañol = "Octubre";
                 break;
             case "11":
-                $mesEspañol = "Noviembre";  
+                $mesEspañol = "Noviembre";
                 break;
             case "12":
-                $mesEspañol = "Diciembre";  
+                $mesEspañol = "Diciembre";
                 break;
-        
         }
         return $mesEspañol;
     }
-
 }

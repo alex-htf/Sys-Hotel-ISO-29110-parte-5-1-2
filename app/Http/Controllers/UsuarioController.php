@@ -10,99 +10,120 @@ use App\Models\User;
 class UsuarioController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Muestra una lista de recursos.
      */
-    public function __construct()  
+    public function __construct()
     {
         $this->middleware('auth');
     }
-    
+
     public function index(Request $request)
     {
-        //
-          
+        // Obtiene el parámetro de búsqueda de usuario, si existe
         $nusuario = isset($request->usuario) ? $request->usuario : '';
 
+        // Obtiene la lista de usuarios según el parámetro de búsqueda
         $usuarios = User::getUsers($nusuario);
 
+        // Ruta para la vista
         $ruta = 'usuarios';
 
-        if ($request->ajax()):
+        // Si es una petición Ajax, devuelve la vista de carga de datos de usuarios
+        if ($request->ajax()) {
             return view('data.load_usuarios_data', compact('usuarios', 'ruta'));
-        endif;
+        }
 
+        // Si no es una petición Ajax, devuelve la vista de módulo de usuarios
         return view('modules.usuarios', compact('usuarios', 'ruta'));
-
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Muestra el formulario para crear un nuevo recurso.
      */
     public function create()
     {
-        //
+        // Ruta para la vista
         $ruta = 'usuarios';
 
+        // Devuelve la vista del formulario para crear usuarios
         return view('modules.crud-usuarios', compact('ruta'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un recurso recién creado en el almacenamiento.
      */
     public function store(Request $request)
     {
-        //
-        if (!$request->ajax()):
+        // Si no es una petición Ajax, redirecciona
+        if (!$request->ajax()) {
             return redirect('/admin/usuarios');
-        endif;
+        }
 
+        // Reglas de validación para el formulario de creación
         $rules = [
-            'nombreUsuario' => 'required',
-            'apellidoUsuario' => 'required',
-            'emailUsuario' => 'required|email',
+            'nombreUsuario' => 'required|max:100|regex:/^[a-zA-Z\s]+$/',
+            'apellidoUsuario' => 'required|max:100|regex:/^[a-zA-Z\s]+$/',
             'txtUsuario' => 'required|unique:users,usuario',
-            'contraseniaUsuario'=>'required|min:6',
-            'confirmarContraseniaUsuario'=>'required|min:6|same:contraseniaUsuario'
-        ];
-        
-        $messages = [
-            'nombreUsuario.required' => 'El Nombre del Usuario es requerido',
-            'apellidoUsuario.required' => 'El Apellido del Usuario es requerido',
-            'emailUsuario.required' => 'El Email del Usuario es requerido',
-            'emailUsuario.email' => 'El Email del Usuario debe ser una dirección Válida',
-            'txtUsuario.required' => 'El campo Usuario es requerido',
-            'txtUsuario.unique' => 'Ya existe el Usuario',
-            'contraseniaUsuario.required' => 'El Campo Contraseña es requerido',
-            'contraseniaUsuario.min' => 'La contraseña debe contener al menos 6 carácteres',
-            'confirmarContraseniaUsuario.required' => 'Es necesario confirmar la contraseña',
-            'confirmarContraseniaUsuario.min' => 'La confirmación de contraseña debe contener al menos 6 carácteres',
-            'confirmarContraseniaUsuario.same' => 'Las contraseñas no coinciden.'
+            'emailUsuario' => 'required|email',
+            'direccionUsuario' => 'required|max:100',
+            'telefonoUsuario' => 'required|digits_between:7,12',
+            'contraseniaUsuario' => 'required|min:6',
+            'confirmarContraseniaUsuario' => 'required|min:6|same:contraseniaUsuario'
         ];
 
+        // Mensajes de validación personalizados
+        $messages = [
+            'nombreUsuario.required' => 'El Nombre de Usuario es requerido',
+            'nombreUsuario.max' => 'El campo Nombre de Usuario debe tener hasta 100 caracteres',
+            'nombreUsuario.regex' => 'El campo Nombre de Usuario debe contener solo letras',
+            'apellidoUsuario.required' => 'El Apellido de Usuario es requerido',
+            'apellidoUsuario.max' => 'El campo Apellido de Usuario debe tener hasta 100 caracteres',
+            'apellidoUsuario.regex' => 'El campo Apellido de Usuario debe contener solo letras',
+            'txtUsuario.required' => 'El Identificador de Usuario es requerido',
+            'txtUsuario.unique' => 'El Identificador de Usuario ya existe',
+            'emailUsuario.required' => 'El Correo Electrónico es requerido',
+            'emailUsuario.email' => 'El campo de Correo Electrónico debe tener un formato válido',
+            'direccionUsuario.required' => 'La Dirección del Usuario es requerida',
+            'direccionUsuario.max' => 'La Dirección del Usuario debe tener hasta 100 caracteres',
+            'telefonoUsuario.required' => 'El Teléfono del Usuario es requerido',
+            'telefonoUsuario.digits_between' => 'El Teléfono del Usuario debe contener de 7 a 12 dígitos',
+            'contraseniaUsuario.required' => 'El Campo Contraseña es requerido',
+            'contraseniaUsuario.min' => 'La contraseña debe contener al menos 6 caracteres',
+            'confirmarContraseniaUsuario.required' => 'Es necesario confirmar la contraseña',
+            'confirmarContraseniaUsuario.min' => 'La confirmación de contraseña debe contener al menos 6 caracteres',
+            'confirmarContraseniaUsuario.same' => 'Las contraseñas no coinciden'
+        ];
+
+        // Realiza la validación del formulario
         $validator = Validator::make($request->all(), $rules, $messages);
 
-        if($validator->fails()):
-            return response()->json(['errors'=>$validator->errors(), 'code' => '422']);
-        else:
-            $fileName= '';
-            if ($request->hasFile('fotoUsuario')):
+        // Si la validación falla, devuelve los errores
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors(), 'code' => '422']);
+        } else {
+            // Inicializa el nombre del archivo de la foto
+            $fileName = '';
+
+            // Si se cargó un archivo de foto, procesa y guarda la foto
+            if ($request->hasFile('fotoUsuario')) {
                 $file = $request->fotoUsuario->getClientOriginalName();
-        
                 $fileName = time() . '.' . $request->fotoUsuario->getClientOriginalExtension();
                 $pathtmp = public_path('img/usuarios/');
 
-                if (!file_exists($pathtmp)):
+                // Si no existe la carpeta de destino, la crea
+                if (!file_exists($pathtmp)) {
                     mkdir($pathtmp, 0777, true);
-                endif;
-            endif;    
+                }
+            }
 
+            // Datos del nuevo usuario
             $data = [
-                "nombres" =>trim($request->nombreUsuario),
-                "apellidos" =>trim($request->apellidoUsuario),
-                "usuario"=>trim($request->txtUsuario),
-                "email"=>trim($request->emailUsuario),
-                "direccion"=>trim($request->direccionUsuario),
-                "telefono"=>trim($request->telefonoUsuario),
+                "nombres" => trim($request->nombreUsuario),
+                "apellidos" => trim($request->apellidoUsuario),
+                "usuario" => trim($request->txtUsuario),
+                "email" => trim($request->emailUsuario),
+                "direccion" => trim($request->direccionUsuario),
+                "telefono" => trim($request->telefonoUsuario),
                 "foto" => $fileName,
                 "password" => Hash::make(trim($request->input('contraseniaUsuario'))),
                 "estado" => 1,
@@ -110,184 +131,225 @@ class UsuarioController extends Controller
                 "remember_token" => Str::random(10)
             ];
 
-            if(User::create($data)):
-                if ($request->hasFile('fotoUsuario')):
+            // Crea el nuevo usuario en la base de datos
+            if (User::create($data)) {
+                // Si se cargó una foto, la guarda en la carpeta de destino
+                if ($request->hasFile('fotoUsuario')) {
                     $request->fotoUsuario->move($pathtmp, $fileName);
-                endif;
-                return response()->json(['msg'=>'sucess', 'code' => '200', 'url'=>url('/usuarios')]);
-            else: 
-                return response()->json(['errors'=>$validator->errors(), 'code' => '425']);
-            endif;
-
-
-        endif;
+                }
+                // Devuelve una respuesta de éxito
+                return response()->json(['msg' => 'sucess', 'code' => '200', 'url' => url('/usuarios')]);
+            } else {
+                // Si falla la creación, devuelve los errores
+                return response()->json(['errors' => $validator->errors(), 'code' => '425']);
+            }
+        }
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el recurso especificado.
      */
     public function show(string $id)
     {
-        //
+        // No implementado
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Muestra el formulario para editar el recurso especificado.
      */
     public function edit(string $id)
     {
-        //
+        // Obtiene los datos del usuario a editar
         $dataU = User::where('user_id', $id)->first();
-
-        if($dataU == NULL):
+        // Si no se encuentra el usuario, redirecciona
+        if ($dataU == NULL) {
             return redirect('/usuarios');
-        endif;
-
+        }
+        // Obtiene los datos del usuario
         $usuario = User::where('user_id', $id)->first();
-
+        // Ruta para la vista
         $ruta = 'usuarios';
-
+        // Devuelve la vista del formulario para editar usuarios
         return view('modules.crud-usuarios', compact('usuario', 'ruta'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el recurso especificado en el almacenamiento.
      */
     public function update(Request $request, string $id)
     {
-        //
-        if (!$request->ajax()):
+        // Si no es una petición Ajax, redirecciona
+        if (!$request->ajax()) {
             return redirect('/usuarios');
-        endif;
-
+        }
+        // Reglas de validación para el formulario de edición
         $rules = [
-            'nombreUsuario' => 'required',
-            'apellidoUsuario' => 'required',
+            'nombreUsuario' => 'required|max:100|regex:/^[a-zA-Z\s]+$/',
+            'apellidoUsuario' => 'required|max:100|regex:/^[a-zA-Z\s]+$/',
+            'txtUsuario' => 'required|unique:users,usuario,' . $id . ',user_id',
             'emailUsuario' => 'required|email',
-            'txtUsuario' => 'required|unique:users,usuario,'.$id.',user_id',
+            'direccionUsuario' => 'required|max:100',
+            'telefonoUsuario' => 'required|digits_between:7,12',
+            'contraseniaUsuario' => 'required|min:6',
+            'confirmarContraseniaUsuario' => 'required|min:6|same:contraseniaUsuario'
         ];
-        
+        // Mensajes de validación personalizados
         $messages = [
-            'nombreUsuario.required' => 'El Nombre del Usuario es requerido',
-            'apellidoUsuario.required' => 'El Apellido del Usuario es requerido',
-            'emailUsuario.required' => 'El Email del Usuario es requerido',
-            'emailUsuario.email' => 'El Email del Usuario debe ser una dirección Válida',
-            'txtUsuario.required' => 'El campo Usuario es requerido',
-            'txtUsuario.unique' => 'Ya existe el Usuario',
+            'nombreUsuario.required' => 'El Nombre de Usuario es requerido',
+            'nombreUsuario.max' => 'El campo Nombre de Usuario debe tener hasta 100 caracteres',
+            'nombreUsuario.regex' => 'El campo Nombre de Usuario debe contener solo letras',
+            'apellidoUsuario.required' => 'El Apellido de Usuario es requerido',
+            'apellidoUsuario.max' => 'El campo Apellido de Usuario debe tener hasta 100 caracteres',
+            'apellidoUsuario.regex' => 'El campo Apellido de Usuario debe contener solo letras',
+            'txtUsuario.required' => 'El Identificador de Usuario es requerido',
+            'txtUsuario.unique' => 'El Identificador de Usuario ya existe',
+            'emailUsuario.required' => 'El Correo Electrónico es requerido',
+            'emailUsuario.email' => 'El campo de Correo Electrónico debe tener un formato válido',
+            'direccionUsuario.required' => 'La Dirección del Usuario es requerida',
+            'direccionUsuario.max' => 'La Dirección del Usuario debe tener hasta 100 caracteres',
+            'telefonoUsuario.required' => 'El Teléfono del Usuario es requerido',
+            'telefonoUsuario.digits_between' => 'El Teléfono del Usuario debe contener de 7 a 12 dígitos',
+            'contraseniaUsuario.required' => 'El campo Contraseña es requerido',
+            'contraseniaUsuario.min' => 'La contraseña debe contener al menos 6 caracteres',
+            'confirmarContraseniaUsuario.required' => 'Es necesario confirmar la contraseña',
+            'confirmarContraseniaUsuario.min' => 'La confirmación de contraseña debe contener al menos 6 caracteres',
+            'confirmarContraseniaUsuario.same' => 'Las contraseñas no coinciden'
         ];
 
+        // Realiza la validación del formulario
         $validator = Validator::make($request->all(), $rules, $messages);
 
-        if($validator->fails()):
-            return response()->json(['errors'=>$validator->errors(), 'code' => '422']);
-        else:
-            
+        // Si la validación falla, devuelve los errores
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors(), 'code' => '422']);
+        } else {
+            // Inicializa la contraseña a editar
             $passwordEditar = '';
 
-            if($request->contraseniaUsuario != "" || $request->confirmarContraseniaUsuario != ""):
-                if(strlen($request->contraseniaUsuario) >=6 || strlen($request->confirmarContraseniaUsuario) >=6):
-                    if(trim($request->contraseniaUsuario) === trim($request->confirmarContraseniaUsuario)):
+            // Si se ingresó una nueva contraseña
+            if ($request->contraseniaUsuario != "" || $request->confirmarContraseniaUsuario != "") {
+                // Verifica que las contraseñas coincidan y tengan al menos 6 caracteres
+                if (strlen($request->contraseniaUsuario) >= 6 || strlen($request->confirmarContraseniaUsuario) >= 6) {
+                    if (trim($request->contraseniaUsuario) === trim($request->confirmarContraseniaUsuario)) {
                         $passwordEditar = Hash::make($request->input('contraseniaUsuario'));
-                    else:
-                        return response()->json(['errors'=>$validator->errors(), 'code' => '424']);
+                    } else {
+                        // Si las contraseñas no coinciden, devuelve un error
+                        return response()->json(['errors' => $validator->errors(), 'code' => '424']);
                         exit;
-                    endif;
-                else:
-                    return response()->json(['errors'=>$validator->errors(), 'code' => '423']);
+                    }
+                } else {
+                    // Si las contraseñas no tienen al menos 6 caracteres, devuelve un error
+                    return response()->json(['errors' => $validator->errors(), 'code' => '423']);
                     exit;
-                endif;
-               
-            else:
+                }
+            } else {
+                // Si no se ingresó una nueva contraseña, se mantiene la contraseña actual
                 $passwordEditar = $request->contaseniaUsuarioActual;
-            endif;
+            }
 
-            $fileName= $request->fotoActualUsuario;
+            // Inicializa el nombre del archivo de la foto
+            $fileName = $request->fotoActualUsuario;
 
-            if ($request->hasFile('fotoUsuario')):
+            // Si se cargó una nueva foto
+            if ($request->hasFile('fotoUsuario')) {
                 $file = $request->fotoUsuario->getClientOriginalName();
-        
                 $fileName = time() . '.' . $request->fotoUsuario->getClientOriginalExtension();
                 $pathtmp = public_path('img/usuarios/');
 
-                if (!file_exists($pathtmp)):
+                // Si no existe la carpeta de destino, la crea
+                if (!file_exists($pathtmp)) {
                     mkdir($pathtmp, 0777, true);
-                endif;
-            endif;    
+                }
+            }
 
+            // Obtiene el usuario a actualizar
             $usuario = User::find($id);
 
+            // Datos actualizados del usuario
             $data = [
-                "nombres" =>trim($request->nombreUsuario),
-                "apellidos" =>trim($request->apellidoUsuario),
-                "usuario"=>trim($request->txtUsuario),
-                "email"=>trim($request->emailUsuario),
-                "direccion"=>trim($request->direccionUsuario),
-                "telefono"=>trim($request->telefonoUsuario),
+                "nombres" => trim($request->nombreUsuario),
+                "apellidos" => trim($request->apellidoUsuario),
+                "usuario" => trim($request->txtUsuario),
+                "email" => trim($request->emailUsuario),
+                "direccion" => trim($request->direccionUsuario),
+                "telefono" => trim($request->telefonoUsuario),
                 "foto" => $fileName,
                 "password" => $passwordEditar,
                 "estado" => 1,
                 "updated_at" => now()
             ];
 
-            if($usuario->update($data)):
-
-                if ($request->hasFile('fotoUsuario')):
+            // Actualiza los detalles del usuario en la base de datos
+            if ($usuario->update($data)) {
+                // Si se cargó una foto, la guarda en la carpeta de destino
+                if ($request->hasFile('fotoUsuario')) {
                     $request->fotoUsuario->move($pathtmp, $fileName);
-                endif;
-                
-                return response()->json(['msg'=>'sucess', 'code' => '200', 'url'=>url('/usuarios')]);
-
-            else:
-                return response()->json(['errors'=>$validator->errors(), 'code' => '425']);
-
-            endif;
-
-        endif;
-
+                }
+                // Devuelve una respuesta de éxito
+                return response()->json(['msg' => 'sucess', 'code' => '200', 'url' => url('/usuarios')]);
+            } else {
+                // Si falla la actualización, devuelve los errores
+                return response()->json(['errors' => $validator->errors(), 'code' => '425']);
+            }
+        }
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina el recurso especificado del almacenamiento.
      */
     public function destroy(Request $request, string $id)
     {
-        //
-        if (!$request->ajax()):
+        // Si no es una petición Ajax, redirecciona
+        if (!$request->ajax()) {
             return redirect('/usuarios');
-        endif;
-
+        }
+        // Elimina el usuario de la base de datos
         User::destroy($id);
-
-        return response()->json(['msg'=>'sucess', 'code' => '200']);
-    
+        // Devuelve una respuesta de éxito
+        return response()->json(['msg' => 'sucess', 'code' => '200']);
     }
 
+    /**
+     * Activa el usuario especificado.
+     */
     public function activar(Request $request, $user_id)
     {
-        if (!$request->ajax()):
+        // Si no es una petición Ajax, redirecciona
+        if (!$request->ajax()) {
             return redirect('/usuarios');
-        endif;
+        }
+        // Encuentra al usuario a activar
         $user = User::find($user_id);
+        // Datos a actualizar
         $data = [
-            "estado"=>1,
+            "estado" => 1,
         ];
-        if($user->update($data)):
-            return response()->json(['msg'=>'sucess', 'code' => '200']);
-        endif;    
-    }
-    
-    public function desactivar(Request $request, $user_id)
-    {
-        if (!$request->ajax()):
-            return redirect('/usuarios');
-        endif;
-        $user = User::find($user_id);
-        $data = [
-            "estado"=>0,
-        ];
-        if($user->update($data)):
-            return response()->json(['msg'=>'sucess', 'code' => '200']);
-        endif;    
+        // Actualiza el estado del usuario en la base de datos
+        if ($user->update($data)) {
+            // Devuelve una respuesta de éxito
+            return response()->json(['msg' => 'sucess', 'code' => '200']);
+        }
     }
 
+    /**
+     * Desactiva el usuario especificado.
+     */
+    public function desactivar(Request $request, $user_id)
+    {
+        // Si no es una petición Ajax, redirecciona
+        if (!$request->ajax()) {
+            return redirect('/usuarios');
+        }
+        // Encuentra al usuario a desactivar
+        $user = User::find($user_id);
+        // Datos a actualizar
+        $data = [
+            "estado" => 0,
+        ];
+        // Actualiza el estado del usuario en la base de datos
+        if ($user->update($data)) {
+            // Devuelve una respuesta de éxito
+            return response()->json(['msg' => 'sucess', 'code' => '200']);
+        }
+    }
 }

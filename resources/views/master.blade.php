@@ -11,7 +11,7 @@
 
 		<!-- Meta -->
 		<meta name="description" content="Sistema de Recepción de Habitaciones para Hotel" />
-		<meta name="author" content="Martín Avila" />
+		<meta name="author" content="Verónica Rodríguez" />
 		<meta property="og:title" content="Sys Hotel">
 		<meta property="og:description" content="Sistema de Recepción de Habitaciones para Hotel">
 		<meta property="og:type" content="Website">

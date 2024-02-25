@@ -4,7 +4,7 @@
 <!-- App brand starts -->
 <div class="app-brand px-3 py-3 d-flex justify-content-center">
     <a href="{{ url('/') }}">
-        <img src="{{asset('assets/images/logo.jpeg')}}" style="border-radius:32px;" class="logo" alt="Logo Hotel" />
+        <img src="{{asset('assets/images/logooo.png')}}" style="border-radius:32px;" class="logo" alt="Logo Hotel" />
     </a>
 </div>
 <!-- App brand ends -->
@@ -12,13 +12,13 @@
 <!-- Sidebar profile starts -->
 <div class="sidebar-user-profile">
     @if(Auth::user()->foto != "")
-        <img src="{{URL::asset('img/usuarios/'.Auth::user()->foto)}}"  style="width:150px !important; height:120px !important;"  class="profile-thumb rounded-2 p-2 d-lg-flex d-none" alt="Usuario Imagen" />
+        <img src="{{URL::asset('img/usuarios/'.Auth::user()->foto)}}" style="width: 75px !important; height: 60px !important;" class="profile-thumb rounded-2 p-2 d-lg-flex d-none" alt="Usuario Imagen" />
     @else
-        <img src="{{asset('assets/images/profile.png')}}" class="profile-thumb rounded-2 p-2 d-lg-flex d-none" alt="Usuario Imagen" />
+        <img src="{{asset('assets/images/profile.png')}}" style="width: 90px !important; height: 85px !important;" class="profile-thumb rounded-2 p-2 d-lg-flex d-none" alt="Usuario Imagen" />
     @endif
     <h5 class="profile-name lh-lg mt-2 text-truncate">{{Auth::user()->usuario}}</h5>
-   
 </div>
+
 <!-- Sidebar profile ends -->
 
 <!-- Sidebar menu starts -->
@@ -37,6 +37,13 @@
             </a>
         </li>
         
+        <li @if($ruta == 'historial') class="active current-page" @endif>
+            <a href="{{ url('recepcion/historial') }}">
+                <i class="fa-solid fa-table-list"></i>
+                <span class="menu-text">Historial</span>
+            </a>
+        </li>
+
         <li @if($ruta == 'habitaciones' || $ruta == 'categorias' || $ruta == 'ubicaciones') class="treeview active" @else class="treeview" @endif>
             <a href="#!">
                 <i class="fa-solid fa-database"></i>
@@ -64,7 +71,7 @@
         <li @if($ruta == 'usuarios') class="active current-page" @endif>
             <a href="{{ url('usuarios') }}">
                 <i class="fa-solid fa-user"></i>
-                <span class="menu-text">Usuarios</span>
+                <span class="menu-text">Usuario</span>
             </a>
         </li>
 
@@ -80,7 +87,7 @@
                 <i class="fa-solid fa-file-invoice"></i>
                 <span class="menu-text">Reportes</span>
             </a>
-        </li>
+        </li>
     </ul>
 </div>
 <!-- Sidebar menu ends -->

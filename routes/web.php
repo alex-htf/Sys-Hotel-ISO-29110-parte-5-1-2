@@ -41,10 +41,6 @@ Route::resource('categorias', CategoriaController::class);
 Route::post('categorias/activar/{id}', [CategoriaController::class, 'activar']);
 Route::post('categorias/desactivar/{id}',  [CategoriaController::class, 'desactivar']);
 
-// Route::resource('tarifas', TarifaController::class);
-// Route::post('tarifas/activar/{id}', [TarifaController::class, 'activar']);
-// Route::post('tarifas/desactivar/{id}',  [TarifaController::class, 'desactivar']);
-
 Route::resource('ubicaciones', UbicacionController::class);
 Route::post('ubicaciones/activar/{id}', [UbicacionController::class, 'activar']);
 Route::post('ubicaciones/desactivar/{id}',  [UbicacionController::class, 'desactivar']);
@@ -53,9 +49,6 @@ Route::resource('habitaciones', HabitacionController::class);
 Route::post('habitaciones/ocupado/{id}', [HabitacionController::class, 'ocupado']);
 Route::post('habitaciones/disponible/{id}',  [HabitacionController::class, 'disponible']);
 Route::get('habitacionInfo/{id}', [HabitacionController::class, 'habitacionInfo']);
-
-// Route::resource('habitaciones/tarifas', TarifaHabitacionController::class);
-// Route::get('habitaciones/ver_tarifas/{id}', [TarifaHabitacionController::class, 'listarTarifasHabitaciones']);
 
 Route::get('habitaciondetails/{id}', [HabitacionController::class, 'habitaciondetails']);
 
@@ -86,8 +79,6 @@ Route::post('configuraciones', [ConfiguracionController::class, 'storeconfigurac
 Route::get('reportes', [ReportesController::class, 'getReporte']);
 Route::get('reportes/vista_previa', [ReportesController::class, 'getReportVistaPrevia']);
 Route::get('reportes/reportePDF', [ReportesController::class, 'getReportPDF'])->name('reportePDF');
-
-Route::resource('paises', PaisesController::class);
 
 Route::any('{catchall}', [HomeController::class, 'get404NotFound'])->where('catchall', '.*');
 

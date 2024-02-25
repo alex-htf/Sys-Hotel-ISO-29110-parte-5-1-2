@@ -1,133 +1,123 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title> 
+    <title>
         Comprobante Recepción
     </title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-
+    <!-- Incluye el archivo CSS de Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 </head>
 <style>
-    /* table {
-    border-collapse: collapse;
-    }
-    table td, table th {
-    border: 1px solid black;
-    }
-    table tr:first-child th {
-    border-top: 0;
-    }
-    table tr:last-child td {
-    border-bottom: 0;
-    }
-    table tr td:first-child,
-    table tr th:first-child {
-    border-left: 0;
-    }
-    table tr td:last-child,
-    table tr th:last-child {
-    border-right: 0;
-    } */
+    /* Estilos para la tabla */
     table {
-            width: 95%;
-            border-collapse: collapse;
-            margin: 50px auto;
-        }
+        width: 95%;
+        border-collapse: collapse;
+        margin: 50px auto;
+    }
 
-        /* Zebra striping */
-        tr:nth-of-type(odd) {
-            background: #eee;
-        }
+    /* Estilos para filas impares */
+    tr:nth-of-type(odd) {
+        background: #eee;
+    }
 
-        th {
-            background: gray;
-            color: white;
-            font-weight: bold;
-        }
+    /* Estilos para encabezados de tabla */
+    th {
+        background: gray;
+        color: white;
+        font-weight: bold;
+        font-size: 14px; /* Tamaño de fuente ajustado */
+    }
 
-        td,
-        th {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-            font-size: 18px;
-        }
+    /* Estilos para celdas de tabla */
+    td,
+    th {
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: left;
+        font-size: 14px; /* Tamaño de fuente ajustado */
+    }
 
-        .tblreporterecepcion th
-        {
-            color: #fff !important;
-        }
+    /* Estilos adicionales para encabezados de tabla */
+    .tblreporterecepcion th {
+        color: #fff !important;
+    }
 </style>
+
 <body>
-     
+
+    <!-- Encabezado de la página -->
     <div style="width: 100%; margin: 0 auto; display:flex; align-items:center;">
         <div style="width: 10%; float:left; margin-right: 10px;">
-            <img src='{{ public_path("assets/images/logo.jpeg") }}'  width="50px" height="50px"  alt="">
+            <!-- Logo -->
+            <img src='{{ public_path("assets/images/logo.jpeg") }}' width="50px" height="50px" alt="">
         </div>
         <div style="width: 68%; float: left; margin-right: 5px;">
-            <center><h2>Reporte Recepción</h2></center>
+            <!-- Título del reporte -->
+            <center>
+                <h2>Reporte Recepción</h2>
+            </center>
         </div>
         <div style="width: 22%; float: left;">
-            <p style="font-size:12px;">Fecha del Reporte: @php echo date('m/d/Y'); @endphp</p>
+            <!-- Fecha del reporte -->
+            <p style="font-size:12px;">Fecha del Reporte: @php echo date('d/m/Y'); @endphp</p> <!-- Tamaño de fuente ajustado -->
         </div>
     </div>
 
+    <!-- Tabla de reporte -->
     <table style="position: relative; top: 50px;  width: 100%; margin-bottom:20px;" class="tblreporterecepcion">
         <thead>
+            <!-- Encabezados de columna -->
             <tr>
-                <th scope="col" style="font-size:12px">#</th>
-                <th scope="col" style="font-size:12px">Habitación</th>
-                <th scope="col" style="font-size:12px">Cliente</th>
-                <th scope="col" style="font-size:12px">Tipo Documento</th>
-                <th scope="col" style="font-size:12px">Documento</th>
-                <th scope="col" style="font-size:12px">Cant. Noches</th>
-                <th scope="col" style="font-size:12px">Cant. Personas</th>
-                <th scope="col" style="font-size:12px">Fecha Entrada</th>
-                <th scope="col" style="font-size:12px">Fecha Salida</th>
-                <th scope="col" style="font-size:12px">Estado Pago</th>
-                <th scope="col" style="font-size:12px">Tipo Pago</th>
-                <th scope="col" style="font-size:12px">Importe</th>
+                <th class="font-weight-bold" scope="col">#</th>
+                <th class="font-weight-bold" scope="col">Habitación</th>
+                <th class="font-weight-bold" scope="col">Cliente</th>
+                <th class="font-weight-bold" scope="col">Tipo Documento</th>
+                <th class="font-weight-bold" scope="col">Documento</th>
+                <th class="font-weight-bold" scope="col">Cant. Noches</th>
+                <th class="font-weight-bold" scope="col">Cant. Personas</th>
+                <th class="font-weight-bold" scope="col">Fecha Entrada</th>
+                <th class="font-weight-bold" scope="col">Fecha Salida</th>
+                <th class="font-weight-bold" scope="col">Total</th>
             </tr>
         </thead>
         <tbody>
             @if(count($reporteData) > 0)
 
-                @php($i=1)       
-                @php($totalreporte=0)            
-                @foreach($reporteData as $key => $rd)
-                    <tr>
-                        <td style="font-size:12px">{{ $i }}</td>
-                        <td class="font-weight-bold" style="font-size:12px">{{ $rd->habitacion }}</td>
-                        <td class="font-weight-bold" style="font-size:12px">{{ $rd->cliente }}</td>
-                        <td class="font-weight-bold" style="font-size:12px">{{ $rd->tipo }}</td>
-                        <td class="font-weight-bold" style="font-size:12px">{{ $rd->documento }}</td>
-                        <td class="font-weight-bold" style="font-size:12px">{{ $rd->cant_noches }}</td>
-                        <td class="font-weight-bold" style="font-size:12px">{{ $rd->cant_personas }}</td>
-                        <td class="font-weight-bold" style="font-size:12px">{{ $rd->fecha_entrada }}</td>
-                        <td class="font-weight-bold" style="font-size:12px">{{ $rd->fecha_salida }}</td>
-                        @if($rd->estado_pago == 1)
-                            <td class="font-weight-bold" style="color: green;font-weight:bold;font-size:10px;">PAGADO</td>
-                        @else 
-                            <td class="font-weight-bold" style="color: red;font-weight:bold;font-size:10px;">FALTA PAGAR</td>
-                        @endif
-                        <td class="font-weight-bold" style="font-size:12px">{{ $rd->pago }}</td>
-                        <td class="font-weight-bold" style="font-size:12px"> {{ $rd->total }}</td>
-                    </tr>
-                    @php($totalreporte+=$rd->total)
-                    @php($i++)
-                @endforeach
-                <tr>
-                    <td colspan="11" style="text-align:right; vertical-align:middle; background: gray;color: white;font-weight: bold;"><b>Total:</b></td>
-                    <td style="text-align:left; vertical-align:middle;">{{$totalreporte}}</td>
-                </tr>
-
-            @else 
-                <tr>
-                    <td style="text-align:center; vertical-align:middle;" colspan="12">No se encontraron datos!!</td>
-                </tr>
-
+            @php($i=1)
+            @php($totalreporte=0)
+            <!-- Ciclo para mostrar los datos del reporte -->
+            @foreach($reporteData as $key => $rd)
+            <tr>
+                <td>{{ $i }}</td>
+                <td class="font-weight-bold">{{ $rd->habitacion }}</td>
+                <td class="font-weight-bold">{{ $rd->cliente }}</td>
+                <td class="font-weight-bold">{{ $rd->tipo }}</td>
+                <td class="font-weight-bold">{{ $rd->documento }}</td>
+                <td class="font-weight-bold">{{ $rd->cant_noches }}</td>
+                <td class="font-weight-bold">{{ $rd->cant_personas }}</td>
+                <td class="font-weight-bold">{{ $rd->fecha_entrada }}</td>
+                <td class="font-weight-bold">{{ $rd->fecha_salida }}</td>
+                <td class="font-weight-bold">$ {{ $rd->total }}</td>
+            </tr>
+            <!-- Cálculo del total del reporte -->
+            @php($totalreporte+=$rd->total)
+            @php($i++)
+            @endforeach
+            <!-- Fila para mostrar el total -->
+            <tr>
+                <td colspan="9" style="text-align:right; background: gray;color: white;font-weight: bold;">
+                    <b>Total:</b></td>
+                    <td style="text-align:left;">$ {{ number_format($totalreporte, 2, '.', '') }}</td>
+            </tr>
+            @else
+            <!-- Mensaje de no se encontraron datos -->
+            <tr>
+                <td style="text-align:center;" colspan="10">No se encontraron datos!!</td>
+            </tr>
             @endif
         </tbody>
     </table>
-
 </body>
+</html>
